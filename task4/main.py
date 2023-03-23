@@ -52,6 +52,19 @@ def clean_html(html):
         return text
 
 
+def save_cleaned_htmls_if_needed(htmls_directory, save_directory):
+    cleaned_htmls_dir = save_directory
+    if Path(cleaned_htmls_dir).is_dir() and len(listdir(cleaned_htmls_dir)) > 0:
+        return
+    print('Cleaning htmls and saving texts')
+    htmls = dir_reader(htmls_directory)
+    texts = extract_text(htmls)
+    Path(cleaned_htmls_dir).mkdir(parents=True, exist_ok=True)
+    for i, text in enumerate(texts):
+        with open(f'{cleaned_htmls_dir}/{i + 1}.txt', 'w') as file:
+            file.write(text)
+
+
 def tokenize_with_count(text):
     text = text.lower()
     t = re.sub(r'[^A-Za-z-]', ' ', text)
@@ -73,19 +86,6 @@ def count_tokens(texts):
     for i, text in enumerate(texts):
         token_count_dicts.append(tokenize_with_count(text))
     return token_count_dicts
-
-
-def save_cleaned_htmls_if_needed(htmls_directory, save_directory):
-    cleaned_htmls_dir = save_directory
-    if Path(cleaned_htmls_dir).is_dir() and len(listdir(cleaned_htmls_dir)) > 0:
-        return
-    print('Cleaning htmls and saving texts')
-    htmls = dir_reader(htmls_directory)
-    texts = extract_text(htmls)
-    Path(cleaned_htmls_dir).mkdir(parents=True, exist_ok=True)
-    for i, text in enumerate(texts):
-        with open(f'{cleaned_htmls_dir}/{i + 1}.txt', 'w') as file:
-            file.write(text)
 
 
 def load_termins(termins_file):
@@ -151,7 +151,6 @@ def calculate_tf_idf(result_dir, word_count_dicts, termins_set, doc_word_sums):
                     file.write(f'{word} 0.0 0.0\n')
                 else:
                     file.write(f'{word} {idf:.20f} {tf_idf:.20f}\n')
-
 
 
 # Перед выполнением нужно запустить task1/main.py и task2/main.py
