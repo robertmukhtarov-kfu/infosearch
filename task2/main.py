@@ -51,7 +51,7 @@ def tokenize(text):
     t = re.sub(r'[^A-Za-z-]', ' ', text)
     t = re.sub(r'\d', '', t)
     t = t.split(' ')
-    t = filter(lambda chunk: chunk in words, t)
+    t = filter(lambda chunk: chunk in words and len(chunk) > 1, t)
     return set(t)
 
 
