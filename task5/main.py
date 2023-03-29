@@ -2,6 +2,9 @@ import math
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from nltk.stem import WordNetLemmatizer
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
 
 
 def load_index(index_file):
@@ -46,6 +49,7 @@ def lemmatize_query(query, lemmatizer, lemma_vocabulary):
                 break
     return lemmatized_query
 
+
 def calculate_query_tfidf(query, lemmas_in_docs):
     query_lemma_count_dict = {}
     for lemma in query:
@@ -80,14 +84,30 @@ def search(query_vector, doc_lemma_matrix_normalized, index):
     return docs
 
 
+@app.route('/')
+def main_page():
+    with open('search.html', 'r') as f:
+        html = f.read()
+    return html
+
+
+@app.route('/search', methods=['POST'])
+def search_query():
+    query = request.form['query']
+    try:
+        query_lemmatized = lemmatize_query(query.lower().strip().split(), lemmatizer, lemma_vocabulary)
+        query_tfidf = calculate_query_tfidf(query_lemmatized, lemmas_in_docs)
+        query_vector = convert_query_to_vector(query_tfidf, lemma_vocabulary)
+        search_results = search(query_vector, doc_lemma_matrix_normalized, index)
+        return jsonify(search_results)
+    except Exception as e:
+        return e.args[0], 500
+
+
 if __name__ == '__main__':
     lemmatizer = WordNetLemmatizer()
     index = load_index('../task1/index.txt')
     lemma_vocabulary = load_lemmas('../task2/lemmas.txt')
     doc_lemma_matrix_normalized = np.load('vector_matrix_normalized.npy')
     lemmas_in_docs = load_lemmas_in_docs_list('../task4/lemmas')
-    query = lemmatize_query('water'.lower().strip().split(), lemmatizer, lemma_vocabulary)
-    query_tfidf = calculate_query_tfidf(query, lemmas_in_docs)
-    query_vector = convert_query_to_vector(query_tfidf, lemma_vocabulary)
-    search_results = search(query_vector, doc_lemma_matrix_normalized, index)
-    print(search_results)
+    app.run()

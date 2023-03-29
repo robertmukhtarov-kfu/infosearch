@@ -26,7 +26,6 @@ def calculate_vector_matrix(lemma_vocabulary, tfidf_directory):
     return doc_lemma_matrix
 
 
-
 if __name__ == '__main__':
     lemma_vocabulary = load_lemmas('../task2/lemmas.txt')
     doc_lemma_matrix = calculate_vector_matrix(lemma_vocabulary, '../task4/lemmas')
